@@ -1,0 +1,28 @@
+ARG BASE_VER=11.6-slim
+FROM debian:$BASE_VER
+
+ARG HELM_VER=3.10.2
+ARG TF_SWITCH_VER=0.13.1308
+
+RUN apt-get update && \
+  apt-get upgrade && \
+  apt-get install awscli jq curl wget -y --no-install-recommends && \
+  wget -O helm.tar.gz https://get.helm.sh/helm-v${HELM_VER}-linux-arm64.tar.gz && \
+  tar -zxvf helm.tar.gz && \
+  mv linux-arm64/helm /usr/local/bin/helm && \
+  rm -f helm.tar.gz && \
+  rm -fr linux-arm64 && \
+  wget -O tfswitch.tar.gz https://github.com/warrensbox/terraform-switcher/releases/download/${TF_SWITCH_VER}/terraform-switcher_${TF_SWITCH_VER}_linux_arm64.tar.gz && \
+  tar -zxvf tfswitch.tar.gz && \
+  mv tfswitch /usr/local/bin/tfswitch && \
+  rm -f tfswitch.tar.gz && \
+  apt-get update -y && \
+  apt-get clean && \
+  rm -fr rm -rf /var/lib/apt/lists/* && \
+  useradd -ms /bin/bash worker
+
+WORKDIR /home/worker
+
+USER worker
+
+ENV PATH "$PATH:/home/worker/bin"
